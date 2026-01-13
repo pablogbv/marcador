@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clasificación — desde Google Sheets</title>
+  <title>Clasificación — Casas</title>
   <style>
     :root{
       --bg:#f6f8fb;
@@ -43,9 +43,7 @@
     }
     .brand h1{margin:0;font-size:18px;letter-spacing:.2px;color:var(--brand)}
     .muted{color:var(--muted);font-size:12px}
-    .controls{
-      display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;
-    }
+    .controls{display:flex; gap:8px; align-items:center; justify-content:flex-end}
     .pill{
       background:#fff;
       border:1px solid var(--ring);
@@ -56,36 +54,18 @@
       box-shadow:0 6px 16px rgba(16,30,60,.06);
       white-space:nowrap;
     }
-    input, button{
-      border-radius:12px; padding:10px 12px; font-weight:600; font-size:14px;
-      border:1px solid var(--ring);
-      box-shadow:0 6px 16px rgba(16,30,60,.06);
-    }
-    input{
-      min-width:260px;
-      background:#fff; color:var(--ink);
-    }
-    button{
-      cursor:pointer;
-      background:linear-gradient(180deg,var(--brand),var(--brand2));
-      color:#fff;
-      border-color:#9e1f1d;
-    }
-    button:hover{filter:brightness(1.05)}
- .grid{
-  display:grid !important;
-  grid-template-columns: repeat(2, minmax(320px, 1fr)) !important; /* 2 arriba + 2 abajo */
-  gap:28px !important;
-  align-items:start !important;
-  margin-top:16px !important;
-}
 
-/* Móvil: 1 columna */
-@media (min-width: 1100px){
-  .grid{
-    gap:32px !important;
-  }
-}
+    /* 2 arriba + 2 abajo, con más aire */
+    .grid{
+      display:grid !important;
+      grid-template-columns: repeat(2, minmax(320px, 1fr)) !important;
+      gap:28px !important;
+      align-items:start;
+      margin-top:18px;
+    }
+    @media (max-width: 640px){
+      .grid{ grid-template-columns: 1fr !important; gap:16px !important; }
+    }
 
     .card{
       position:relative;
@@ -147,6 +127,7 @@
       width:0;
       transition: width .9s cubic-bezier(.2,.8,.2,1);
     }
+
     details{
       margin-top:12px;
       border-top:1px dashed var(--ring);
@@ -157,8 +138,10 @@
       font-weight:700;
       color:var(--muted);
       list-style:none;
+      user-select:none;
     }
     summary::-webkit-details-marker{display:none}
+
     .subgrid{
       margin-top:10px;
       display:grid;
@@ -186,6 +169,7 @@
     }
     .mini > b{display:block;height:100%;width:0}
     .row strong{justify-self:end; white-space:nowrap}
+
     .students{
       margin-top:10px;
       display:flex;
@@ -211,14 +195,7 @@
       white-space:nowrap;
       font-weight:900;
     }
-    .notice{
-      margin-top:12px;
-      border:1px dashed #cbd5e1;
-      border-radius:12px;
-      padding:10px;
-      color:#334155;
-      background:#ffffff;
-    }
+
     .footer{
       margin-top:16px;
       display:flex; justify-content:space-between; align-items:center;
@@ -226,7 +203,6 @@
       color:var(--muted);
       font-size:12px;
     }
-    code{background:#f3f6fc;border:1px solid var(--ring);padding:2px 6px;border-radius:8px}
   </style>
 </head>
 <body>
@@ -238,26 +214,14 @@
         </svg>
         <div style="min-width:0">
           <h1 id="boardTitle">Clasificación de Casas</h1>
-          <div class="muted" id="subTitle">Visor — datos desde Google Sheets</div>
+          <div class="muted" id="subTitle">Actualizando…</div>
         </div>
       </div>
 
       <div class="controls">
-        <input id="sheetId" type="text" placeholder="Pega aquí el ID de Google Sheets" />
-        <button id="saveId">Guardar</button>
-        <button id="refreshBtn">Refrescar</button>
-        <span class="pill" id="status">Sin cargar</span>
+        <span class="pill" id="status">Cargando…</span>
       </div>
     </header>
-
-    <div class="notice">
-      <b>Cómo usarlo:</b>
-      <ol>
-        <li>Sube la plantilla a Google Sheets y rellena <code>TEAMS</code>, <code>STUDENTS</code> y <code>SCORES</code>.</li>
-        <li>Comparte la hoja: “Cualquiera con el enlace” (lector).</li>
-        <li>Copia el ID de la URL: <code>.../spreadsheets/d/ID/edit</code> y pégalo arriba.</li>
-      </ol>
-    </div>
 
     <section class="grid" id="grid" aria-live="polite" aria-label="Equipos ordenados por puntos"></section>
 
@@ -270,9 +234,7 @@
 <script>
 (() => {
   // ===== CONFIG =====
-  // Si quieres que el HTML venga ya con un ID por defecto, ponlo aquí:
-  const DEFAULT_SHEET_ID = "";
-  // Nombres de pestañas (no los cambies en Sheets)
+  const SHEET_ID = "129jrza5w-IDytTcx3g1E1flS2RPbndzWqiHGRqbPR60";
   const TAB_CONFIG = "CONFIG";
   const TAB_TEAMS = "TEAMS";
   const TAB_STUDENTS = "STUDENTS";
@@ -283,29 +245,13 @@
   const subEl = document.getElementById('subTitle');
   const statusEl = document.getElementById('status');
   const updatedEl = document.getElementById('updated');
-  const sheetIdInput = document.getElementById('sheetId');
 
-  const saved = localStorage.getItem('gs_sheet_id') || DEFAULT_SHEET_ID;
-  if(saved) sheetIdInput.value = saved;
-
-  document.getElementById('saveId').addEventListener('click', () => {
-    localStorage.setItem('gs_sheet_id', sheetIdInput.value.trim());
-    ping();
-  });
-  document.getElementById('refreshBtn').addEventListener('click', () => loadAll(true));
-
-  async function ping(){
-    statusEl.textContent = "ID guardado. Pulsa Refrescar.";
-  }
-
-  function gvizUrl(sheetId, tab){
-    const base = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/gviz/tq`;
-    // headers=1 -> usa la primera fila como cabecera
+  function gvizUrl(tab){
+    const base = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(SHEET_ID)}/gviz/tq`;
     return `${base}?tqx=out:json&headers=1&sheet=${encodeURIComponent(tab)}`;
   }
 
   function parseGviz(text){
-    // Google devuelve: google.visualization.Query.setResponse({...});
     const start = text.indexOf('{');
     const end = text.lastIndexOf('}');
     const json = JSON.parse(text.slice(start, end+1));
@@ -322,8 +268,8 @@
     return rows;
   }
 
-  async function fetchTab(sheetId, tab){
-    const res = await fetch(gvizUrl(sheetId, tab), { cache: "no-store" });
+  async function fetchTab(tab){
+    const res = await fetch(gvizUrl(tab), { cache: "no-store" });
     if(!res.ok) throw new Error(`No se pudo leer ${tab} (HTTP ${res.status}). ¿Hoja pública?`);
     const text = await res.text();
     return parseGviz(text);
@@ -356,35 +302,26 @@
   function computeModel(configRows, teamRows, studentRows, scoreRows){
     const cfg = {};
     for(const r of configRows){
-      // CONFIG es tipo "clave" "valor" en A/B, pero también puede traer listas.
-      // En la plantilla: A1..B2 etc. y categorías en la columna A desde A6.
-      // gviz devuelve columnas según primera fila, así que tratamos dos casos:
-      // Caso A: filas tipo {board_title: ..., refresh_seconds: ...} (si alguien convirtió a tabla)
-      // Caso B: columnas col_0 / col_1 (si hay 1 sola columna útil)
       const keys = Object.keys(r);
       if(keys.includes("board_title")) cfg.title = r["board_title"];
       if(keys.includes("refresh_seconds")) cfg.refresh_seconds = num(r["refresh_seconds"]);
     }
-    // Extraer categorías leyendo la columna "categories (una por fila)" si existe como label
-    // En la plantilla CONFIG no es tabla perfecta; para hacerlo robusto:
+
+    // Categorías robustas: de CONFIG (col_0 o "categories (una por fila)") + columnas SCORES
     const categories = [];
-    // Si la hoja viene con una columna única, usa col_0:
     for(const r of configRows){
       const v = r["categories (una por fila)"] ?? r["col_0"] ?? "";
       const s = String(v).trim();
       if(!s) continue;
       if(s.toLowerCase().includes("categories")) continue;
       if(["board_title","refresh_seconds","currency_or_unit"].includes(s)) continue;
-      // evitar duplicados
-      if(!categories.includes(s) && s.length<40) categories.push(s);
+      if(!categories.includes(s) && s.length < 60) categories.push(s);
     }
 
-    // TEAMS
     const teams = teamRows
       .filter(r => normBool(r.active ?? true))
       .map(r => {
         const bonus = {};
-        // bonus_*: cualquier columna que empiece por bonus_
         Object.keys(r).forEach(k => {
           if(k.startsWith("bonus_")){
             const cat = k.replace("bonus_","");
@@ -400,7 +337,6 @@
         };
       });
 
-    // STUDENTS
     const students = studentRows
       .filter(r => normBool(r.active ?? true))
       .map(r => ({
@@ -409,24 +345,19 @@
         team_id: String(r.team_id||"").trim()
       }));
 
-    // SCORES (matriz): columnas de categorías (las que existan)
-    // scoreRows trae student_id, student_name(auto), team_id(auto) y las categorías como columnas
     const scoresByStudent = new Map();
     for(const r of scoreRows){
       const sid = String(r.student_id||"").trim();
       if(!sid) continue;
       const rec = {};
-      // Tomar categorías según columnas disponibles:
       for(const k of Object.keys(r)){
         if(["student_id","student_name (auto)","team_id (auto)"].includes(k)) continue;
-        // en la plantilla son categorías
         rec[k] = num(r[k]);
         if(!categories.includes(k)) categories.push(k);
       }
       scoresByStudent.set(sid, rec);
     }
 
-    // Model final: equipos con miembros
     const teamsById = new Map(teams.map(t=>[t.id,t]));
     const membersByTeam = new Map(teams.map(t=>[t.id, []]));
 
@@ -451,15 +382,17 @@
       return { ...t, categories, members, byCat, total };
     }).sort((a,b)=>b.total-a.total);
 
-    const title = cfg.title || "Clasificación de Casas";
-    const refresh = cfg.refresh_seconds || 30;
-
-    return { title, refresh, categories, teams: teamModels };
+    return {
+      title: cfg.title || "Clasificación de Casas",
+      refresh: cfg.refresh_seconds || 30,
+      categories,
+      teams: teamModels
+    };
   }
 
   function render(model){
     titleEl.textContent = model.title;
-    subEl.textContent = `Visor — Google Sheets (auto cada ${model.refresh}s)`;
+    subEl.textContent = `Actualización automática cada ${model.refresh}s`;
     grid.innerHTML = "";
 
     const maxTotal = Math.max(1, ...model.teams.map(t=>t.total));
@@ -517,7 +450,7 @@
 
       const details = document.createElement("details");
       const summary = document.createElement("summary");
-      summary.textContent = "Ver desglose (categorías y alumnos)";
+      summary.textContent = "Ver desglose";
       details.appendChild(summary);
 
       const catBox = document.createElement("div");
@@ -565,34 +498,29 @@
   let timer = null;
 
   async function loadAll(showStatus=false){
-    const sid = sheetIdInput.value.trim();
-    if(!sid){
-      statusEl.textContent = "Pega un ID de Sheets";
-      return;
-    }
     if(showStatus) statusEl.textContent = "Cargando…";
     try{
       const [cfg, teams, students, scores] = await Promise.all([
-        fetchTab(sid, TAB_CONFIG),
-        fetchTab(sid, TAB_TEAMS),
-        fetchTab(sid, TAB_STUDENTS),
-        fetchTab(sid, TAB_SCORES),
+        fetchTab(TAB_CONFIG),
+        fetchTab(TAB_TEAMS),
+        fetchTab(TAB_STUDENTS),
+        fetchTab(TAB_SCORES),
       ]);
       const model = computeModel(cfg, teams, students, scores);
       render(model);
       statusEl.textContent = "OK";
-      // Auto-refresh
       clearInterval(timer);
       timer = setInterval(()=>loadAll(false), Math.max(10, model.refresh)*1000);
     }catch(err){
       console.error(err);
-      statusEl.textContent = "Error al leer Sheets";
-      alert(String(err.message || err));
+      statusEl.textContent = "Error";
+      // Mensaje claro pero sin revelar ID:
+      alert("No se pudo cargar la clasificación. Revisa que el Google Sheet sea público (lector) y que existan las pestañas CONFIG/TEAMS/STUDENTS/SCORES.");
     }
   }
 
   // Autocarga
-  if(saved){ loadAll(true); }
+  loadAll(true);
 })();
 </script>
 </body>
