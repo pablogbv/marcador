@@ -72,12 +72,24 @@
       border-color:#9e1f1d;
     }
     button:hover{filter:brightness(1.05)}
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap:16px;
-      align-items:start;
-      margin-top:14px;
+   .grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr)); /* 2 arriba + 2 abajo */
+  gap:16px;
+  align-items:start;
+  margin-top:14px;
+}
+
+/* Tablet: sigue 2 columnas */
+@media (max-width: 900px){
+  .grid{ grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+}
+
+/* Móvil: 1 columna */
+@media (max-width: 640px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
     }
     .card{
       position:relative;
