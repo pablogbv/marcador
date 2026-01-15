@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clasificación — Casas</title>
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --panel:#ffffff;
+      --ink:#0f1a2a;
+      --muted:#5f6b85;
+      --ring:#e4e8f2;
+
+      --brand:#D0312D;
+      --brand2:#B92826;
+
+      --gold:#d4aa00; --silver:#c0c7d1; --bronze:#c0843d;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 10% -10%, #ffe6ec 0%, rgba(255,230,236,0) 60%),
+        var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+    .wrap{max-width:1240px;margin:0 auto;padding:22px 10px}
+    header{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+      background:linear-gradient(180deg,#fff,#fff7f9);
+      border:1px solid var(--ring);
+      border-radius:16px;
+      padding:10px 14px;
+      box-shadow:0 10px 24px rgba(16,30,60,.08);
+      min-width:min(620px, 100%);
+    }
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px;color:var(--brand)}
+    .muted{color:var(--muted);font-size:12px}
+    .controls{display:flex; gap:8px; align-items:center; justify-content:flex-end}
+    .pill{
+      background:#fff;
+      border:1px solid var(--ring);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      box-shadow:0 6px 16px rgba(16,30,60,.06);
+      white-space:nowrap;
+    }
+
+    /* 2 arriba + 2 abajo, con más aire */
+    .grid{
+      display:grid !important;
+      grid-template-columns: repeat(2, minmax(320px, 1fr)) !important;
+      gap:28px !important;
+      align-items:start;
+      margin-top:18px;
+    }
+    @media (max-width: 640px){
+      .grid{ grid-template-columns: 1fr !important; gap:16px !important; }
+    }
+
+    .card{
+      position:relative;
+      background:var(--panel);
+      border:1px solid var(--ring);
+      border-radius:18px;
+      padding:18px;
+      padding-top:60px; /* hueco para el badge */
+      box-shadow:0 14px 32px rgba(16,30,60,.10);
+      overflow:hidden;
+    }
+    .badge{
+      position:absolute; top:12px; right:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--ring);
+      background:#fff;
+      font-weight:900;
+      font-size:14px;
+      white-space:nowrap;
+      z-index:2;
+    }
+    .b1{background:linear-gradient(180deg,#fff7d1,#fde68a); color:#7a5a00; border-color:#f1ce55}
+    .b2{background:linear-gradient(180deg,#f5f7fb,#e7eaf2); color:#4b5563; border-color:#d5dae6}
+    .b3{background:linear-gradient(180deg,#fff1df,#fde3c7); color:#7a4a1a; border-color:#f0c9a1}
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      min-width:0;
+    }
+    .id{
+      display:flex; align-items:center; gap:12px;
+      min-width:0;
+    }
+    .avatar{
+      width:60px;height:60px;border-radius:14px;
+      background:#f3f6fc;border:1px dashed #cbd5e1;
+      overflow:hidden; flex:0 0 auto;
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .name{
+      font-weight:900;font-size:18px;
+      min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .total{
+      font-weight:900;font-size:28px;
+      white-space:nowrap; flex:0 0 auto;
+    }
+    .progress{
+      margin-top:10px;
+      height:12px;
+      border-radius:999px;
+      border:1px solid var(--ring);
+      background:#f3f6fc;
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0;
+      transition: width .9s cubic-bezier(.2,.8,.2,1);
+    }
+
+    details{
+      margin-top:12px;
+      border-top:1px dashed var(--ring);
+      padding-top:10px;
+    }
+    summary{
+      cursor:pointer;
+      font-weight:700;
+      color:var(--muted);
+      list-style:none;
+      user-select:none;
+    }
+    summary::-webkit-details-marker{display:none}
+
+    .subgrid{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: minmax(120px, 1fr) minmax(90px, 2fr) auto;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      color:#334155;
+      min-width:0;
+    }
+    .row > span{
+      min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .mini{
+      height:6px;
+      border-radius:999px;
+      border:1px solid var(--ring);
+      background:#f3f6fc;
+      overflow:hidden;
+    }
+    .mini > b{display:block;height:100%;width:0}
+    .row strong{justify-self:end; white-space:nowrap}
+
+    .students{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .student{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--ring);
+      border-radius:12px;
+      padding:8px 10px;
+      background:#fff;
+      min-width:0;
+    }
+    .student .sn{
+      min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      font-weight:700;
+    }
+    .student .st{
+      white-space:nowrap;
+      font-weight:900;
+    }
+
+    .footer{
+      margin-top:16px;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px; flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3h12a2 2 0 0 1 2 2v16l-8-4-8 4V5a2 2 0 0 1 2-2z" stroke="var(--brand)" stroke-width="1.5"/>
+        </svg>
+        <div style="min-width:0">
+          <h1 id="boardTitle">Clasificación de Casas</h1>
+          <div class="muted" id="subTitle">Actualizando…</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <span class="pill" id="status">Cargando…</span>
+      </div>
+    </header>
+
+    <section class="grid" id="grid" aria-live="polite" aria-label="Equipos ordenados por puntos"></section>
+
+    <div class="footer">
+      <span id="updated">Sin datos todavía.</span>
+      <span>© Curso actual — lectura</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ===== CONFIG =====
+  const SHEET_ID = "129jrza5w-IDytTcx3g1E1flS2RPbndzWqiHGRqbPR60";
+  const TAB_CONFIG = "CONFIG";
+  const TAB_TEAMS = "TEAMS";
+  const TAB_STUDENTS = "STUDENTS";
+  const TAB_SCORES = "SCORES";
+
+  const grid = document.getElementById('grid');
+  const titleEl = document.getElementById('boardTitle');
+  const subEl = document.getElementById('subTitle');
+  const statusEl = document.getElementById('status');
+  const updatedEl = document.getElementById('updated');
+
+  function gvizUrl(tab){
+    const base = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(SHEET_ID)}/gviz/tq`;
+    return `${base}?tqx=out:json&headers=1&sheet=${encodeURIComponent(tab)}`;
+  }
+
+  function parseGviz(text){
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    const json = JSON.parse(text.slice(start, end+1));
+    const table = json.table;
+    const cols = table.cols.map(c => (c.label || "").trim());
+    const rows = (table.rows || []).map(r => {
+      const obj = {};
+      (r.c || []).forEach((cell, i) => {
+        const key = cols[i] || `col_${i}`;
+        obj[key] = cell && cell.v != null ? cell.v : "";
+      });
+      return obj;
+    });
+    return rows;
+  }
+
+  async function fetchTab(tab){
+    const res = await fetch(gvizUrl(tab), { cache: "no-store" });
+    if(!res.ok) throw new Error(`No se pudo leer ${tab} (HTTP ${res.status}). ¿Hoja pública?`);
+    const text = await res.text();
+    return parseGviz(text);
+  }
+
+  function normBool(v){
+    if(typeof v === "boolean") return v;
+    const s = String(v).trim().toLowerCase();
+    return s === "true" || s === "1" || s === "sí" || s === "si" || s === "yes";
+  }
+
+  function num(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function stripe(color){
+    return `repeating-linear-gradient(45deg, ${color}, ${color} 8px, rgba(255,255,255,.10) 8px, rgba(255,255,255,.10) 16px)`;
+  }
+
+  function safeHex(c){
+    const s = String(c||"").trim();
+    return s || "#D0312D";
+  }
+
+  function sumObj(obj){
+    return Object.values(obj).reduce((a,v)=>a+num(v),0);
+  }
+
+  function computeModel(configRows, teamRows, studentRows, scoreRows){
+    const cfg = {};
+    for(const r of configRows){
+      const keys = Object.keys(r);
+      if(keys.includes("board_title")) cfg.title = r["board_title"];
+      if(keys.includes("refresh_seconds")) cfg.refresh_seconds = num(r["refresh_seconds"]);
+    }
+
+    // Categorías robustas: de CONFIG (col_0 o "categories (una por fila)") + columnas SCORES
+    const categories = [];
+    for(const r of configRows){
+      const v = r["categories (una por fila)"] ?? r["col_0"] ?? "";
+      const s = String(v).trim();
+      if(!s) continue;
+      if(s.toLowerCase().includes("categories")) continue;
+      if(["board_title","refresh_seconds","currency_or_unit"].includes(s)) continue;
+      if(!categories.includes(s) && s.length < 60) categories.push(s);
+    }
+
+    const teams = teamRows
+      .filter(r => normBool(r.active ?? true))
+      .map(r => {
+        const bonus = {};
+        Object.keys(r).forEach(k => {
+          if(k.startsWith("bonus_")){
+            const cat = k.replace("bonus_","");
+            bonus[cat] = num(r[k]);
+          }
+        });
+        return {
+          id: String(r.team_id||"").trim(),
+          name: String(r.team_name||"").trim() || String(r.team_id||"").trim(),
+          color: safeHex(r.team_color_hex),
+          image: String(r.image_url||"").trim(),
+          bonus
+        };
+      });
+
+    const students = studentRows
+      .filter(r => normBool(r.active ?? true))
+      .map(r => ({
+        id: String(r.student_id||"").trim(),
+        name: String(r.student_name||"").trim(),
+        team_id: String(r.team_id||"").trim()
+      }));
+
+    const scoresByStudent = new Map();
+    for(const r of scoreRows){
+      const sid = String(r.student_id||"").trim();
+      if(!sid) continue;
+      const rec = {};
+      for(const k of Object.keys(r)){
+        if(["student_id","student_name (auto)","team_id (auto)"].includes(k)) continue;
+        rec[k] = num(r[k]);
+        if(!categories.includes(k)) categories.push(k);
+      }
+      scoresByStudent.set(sid, rec);
+    }
+
+    const teamsById = new Map(teams.map(t=>[t.id,t]));
+    const membersByTeam = new Map(teams.map(t=>[t.id, []]));
+
+    for(const st of students){
+      if(!teamsById.has(st.team_id)) continue;
+      const rec = scoresByStudent.get(st.id) || {};
+      const perCat = {};
+      categories.forEach(c => perCat[c] = num(rec[c] ?? 0));
+      const total = sumObj(perCat);
+      membersByTeam.get(st.team_id).push({ id: st.id, name: st.name, perCat, total });
+    }
+
+    const teamModels = teams.map(t=>{
+      const members = (membersByTeam.get(t.id) || []).sort((a,b)=>b.total-a.total);
+      const byCat = {};
+      categories.forEach(c=>{
+        const mSum = members.reduce((acc,m)=>acc + num(m.perCat[c]), 0);
+        byCat[c] = mSum + num(t.bonus?.[c] || 0);
+      });
+      const bonusSum = sumObj(t.bonus || {});
+      const total = members.reduce((a,m)=>a+m.total,0) + bonusSum;
+      return { ...t, categories, members, byCat, total };
+    }).sort((a,b)=>b.total-a.total);
+
+    return {
+      title: cfg.title || "Clasificación de Casas",
+      refresh: cfg.refresh_seconds || 30,
+      categories,
+      teams: teamModels
+    };
+  }
+
+  function render(model){
+    titleEl.textContent = model.title;
+    subEl.textContent = `Actualización automática cada ${model.refresh}s`;
+    grid.innerHTML = "";
+
+    const maxTotal = Math.max(1, ...model.teams.map(t=>t.total));
+    model.teams.forEach((t, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `#${idx+1}`;
+      if(idx===0) badge.classList.add("b1");
+      else if(idx===1) badge.classList.add("b2");
+      else if(idx===2) badge.classList.add("b3");
+      card.appendChild(badge);
+
+      const top = document.createElement("div");
+      top.className = "top";
+
+      const id = document.createElement("div");
+      id.className = "id";
+
+      const av = document.createElement("div");
+      av.className = "avatar";
+      if(t.image){
+        const im = document.createElement("img");
+        im.src = t.image;
+        im.alt = `Imagen de ${t.name}`;
+        av.appendChild(im);
+      }
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = t.name;
+      name.style.color = t.color;
+
+      id.appendChild(av);
+      id.appendChild(name);
+
+      const total = document.createElement("div");
+      total.className = "total";
+      total.textContent = t.total;
+      total.style.color = t.color;
+
+      top.appendChild(id);
+      top.appendChild(total);
+      card.appendChild(top);
+
+      const prog = document.createElement("div");
+      prog.className = "progress";
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.background = stripe(t.color);
+      requestAnimationFrame(()=> bar.style.width = `${(t.total/maxTotal)*100}%`);
+      prog.appendChild(bar);
+      card.appendChild(prog);
+
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = "Ver desglose";
+      details.appendChild(summary);
+
+      const catBox = document.createElement("div");
+      catBox.className = "subgrid";
+
+      const maxCat = Math.max(1, ...Object.values(t.byCat));
+      Object.entries(t.byCat).forEach(([c,v])=>{
+        const row = document.createElement("div"); row.className="row";
+        const lab = document.createElement("span"); lab.textContent = c; lab.title = c;
+        const mini = document.createElement("div"); mini.className="mini";
+        const b = document.createElement("b"); b.style.background = t.color; b.style.width = `${(num(v)/maxCat)*100}%`;
+        mini.appendChild(b);
+        const val = document.createElement("strong"); val.textContent = v;
+        row.appendChild(lab); row.appendChild(mini); row.appendChild(val);
+        catBox.appendChild(row);
+      });
+
+      const stu = document.createElement("div");
+      stu.className = "students";
+      if(t.members.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Sin alumnos (o sin datos en SCORES).";
+        stu.appendChild(empty);
+      }else{
+        t.members.forEach(m=>{
+          const s = document.createElement("div"); s.className="student";
+          const sn = document.createElement("div"); sn.className="sn"; sn.textContent = m.name;
+          const st = document.createElement("div"); st.className="st"; st.textContent = m.total;
+          s.appendChild(sn); s.appendChild(st);
+          stu.appendChild(s);
+        });
+      }
+
+      details.appendChild(catBox);
+      details.appendChild(stu);
+      card.appendChild(details);
+
+      grid.appendChild(card);
+    });
+
+    updatedEl.textContent = "Última actualización: " + new Date().toLocaleString();
+  }
+
+  let timer = null;
+
+  async function loadAll(showStatus=false){
+    if(showStatus) statusEl.textContent = "Cargando…";
+    try{
+      const [cfg, teams, students, scores] = await Promise.all([
+        fetchTab(TAB_CONFIG),
+        fetchTab(TAB_TEAMS),
+        fetchTab(TAB_STUDENTS),
+        fetchTab(TAB_SCORES),
+      ]);
+      const model = computeModel(cfg, teams, students, scores);
+      render(model);
+      statusEl.textContent = "OK";
+      clearInterval(timer);
+      timer = setInterval(()=>loadAll(false), Math.max(10, model.refresh)*1000);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "Error";
+      // Mensaje claro pero sin revelar ID:
+      alert("No se pudo cargar la clasificación. Revisa que el Google Sheet sea público (lector) y que existan las pestañas CONFIG/TEAMS/STUDENTS/SCORES.");
+    }
+  }
+
+  // Autocarga
+  loadAll(true);
+})();
+</script>
+</body>
+</html>

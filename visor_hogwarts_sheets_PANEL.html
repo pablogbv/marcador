@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clasificación — Casas</title>
+  <style>
+    :root{--bg:#f6f8fb;--panel:#ffffff;--ink:#0f1a2a;--muted:#5f6b85;--ring:#e4e8f2;--brand:#D0312D;}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 700px at 10% -10%, #ffe6ec 0%, rgba(255,230,236,0) 60%), var(--bg);
+      color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;}
+    .wrap{max-width:1240px;margin:0 auto;padding:22px 10px}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .brand{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#fff,#fff7f9);border:1px solid var(--ring);
+      border-radius:16px;padding:10px 14px;box-shadow:0 10px 24px rgba(16,30,60,.08);min-width:min(620px,100%);}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px;color:var(--brand)}
+    .muted{color:var(--muted);font-size:12px}
+    .pill{background:#fff;border:1px solid var(--ring);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted);
+      box-shadow:0 6px 16px rgba(16,30,60,.06);white-space:nowrap;}
+    .grid{display:grid !important;grid-template-columns:repeat(2,minmax(320px,1fr)) !important;gap:28px !important;align-items:start;margin-top:18px;}
+    @media (max-width:640px){.grid{grid-template-columns:1fr !important;gap:16px !important;}}
+    .card{position:relative;background:var(--panel);border:1px solid var(--ring);border-radius:18px;padding:18px;padding-top:60px;
+      box-shadow:0 14px 32px rgba(16,30,60,.10);overflow:hidden;}
+    .badge{position:absolute;top:12px;right:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--ring);background:#fff;font-weight:900;font-size:14px;z-index:2;}
+    .b1{background:linear-gradient(180deg,#fff7d1,#fde68a);color:#7a5a00;border-color:#f1ce55}
+    .b2{background:linear-gradient(180deg,#f5f7fb,#e7eaf2);color:#4b5563;border-color:#d5dae6}
+    .b3{background:linear-gradient(180deg,#fff1df,#fde3c7);color:#7a4a1a;border-color:#f0c9a1}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;}
+    .id{display:flex;align-items:center;gap:12px;min-width:0;}
+    .avatar{width:60px;height:60px;border-radius:14px;background:#f3f6fc;border:1px dashed #cbd5e1;overflow:hidden;flex:0 0 auto;}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .name{font-weight:900;font-size:18px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .total{font-weight:900;font-size:28px;white-space:nowrap;flex:0 0 auto;}
+    .progress{margin-top:10px;height:12px;border-radius:999px;border:1px solid var(--ring);background:#f3f6fc;overflow:hidden;}
+    .bar{height:100%;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1);}
+    details{margin-top:12px;border-top:1px dashed var(--ring);padding-top:10px;}
+    summary{cursor:pointer;font-weight:700;color:var(--muted);list-style:none;user-select:none;}
+    summary::-webkit-details-marker{display:none}
+    .subgrid{margin-top:10px;display:grid;grid-template-columns:1fr;gap:8px;}
+    .row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(90px,2fr) auto;gap:10px;align-items:center;font-size:13px;color:#334155;min-width:0;}
+    .row>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mini{height:6px;border-radius:999px;border:1px solid var(--ring);background:#f3f6fc;overflow:hidden;}
+    .mini>b{display:block;height:100%;width:0}
+    .row strong{justify-self:end;white-space:nowrap}
+    .students{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+    .student{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--ring);border-radius:12px;padding:8px 10px;background:#fff;min-width:0;}
+    .student .sn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;}
+    .student .st{white-space:nowrap;font-weight:900;}
+    .feed{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .event{border:1px solid var(--ring);border-radius:12px;padding:10px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;}
+    .event .who{font-weight:800}
+    .event .why{color:#334155;font-size:13px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;}
+    .event .meta{color:var(--muted);font-size:12px;white-space:nowrap;text-align:right}
+    .event .pts{font-weight:900;font-size:14px}
+    .footer{margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3h12a2 2 0 0 1 2 2v16l-8-4-8 4V5a2 2 0 0 1 2-2z" stroke="var(--brand)" stroke-width="1.5"/>
+        </svg>
+        <div style="min-width:0">
+          <h1 id="boardTitle">Clasificación de Casas</h1>
+          <div class="muted" id="subTitle">Actualizando…</div>
+        </div>
+      </div>
+      <span class="pill" id="status">Cargando…</span>
+    </header>
+
+    <section class="grid" id="grid" aria-live="polite"></section>
+
+    <div class="footer">
+      <span id="updated">Sin datos todavía.</span>
+      <span>© Curso actual — lectura</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const SHEET_ID = "REEMPLAZA_POR_TU_ID";
+  const TAB_SETUP = "SETUP";
+  const TAB_TEAMS = "TEAMS";
+  const TAB_SCORES = "SCORES";
+  const TAB_EVENTS = "EVENTS";
+
+  const grid = document.getElementById('grid');
+  const titleEl = document.getElementById('boardTitle');
+  const subEl = document.getElementById('subTitle');
+  const statusEl = document.getElementById('status');
+  const updatedEl = document.getElementById('updated');
+
+  function gvizUrl(tab){
+    const base = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(SHEET_ID)}/gviz/tq`;
+    return `${base}?tqx=out:json&headers=1&sheet=${encodeURIComponent(tab)}`;
+  }
+  function parseGviz(text){
+    const start = text.indexOf('{'); const end = text.lastIndexOf('}');
+    const json = JSON.parse(text.slice(start, end+1));
+    const table = json.table;
+    const cols = table.cols.map(c => (c.label || "").trim());
+    return (table.rows || []).map(r => {
+      const obj = {};
+      (r.c || []).forEach((cell, i) => {
+        const key = cols[i] || `col_${i}`;
+        obj[key] = cell && cell.v != null ? cell.v : "";
+      });
+      return obj;
+    });
+  }
+  async function fetchTab(tab){
+    const res = await fetch(gvizUrl(tab), { cache: "no-store" });
+    if(!res.ok) throw new Error(`No se pudo leer ${tab} (HTTP ${res.status}). ¿Hoja pública?`);
+    return parseGviz(await res.text());
+  }
+
+  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+  const normBool = v => String(v).trim().toLowerCase()==="true" || v===true || String(v).trim()==="1";
+  const stripe = c => `repeating-linear-gradient(45deg, ${c}, ${c} 8px, rgba(255,255,255,.10) 8px, rgba(255,255,255,.10) 16px)`;
+  const safeHex = c => (String(c||"").trim() || "#D0312D");
+
+  function readSetup(setupRows){
+    let title="Clasificación de Casas";
+    let refresh=15;
+    for(const r of setupRows){
+      if("BoardTitle" in r && String(r.BoardTitle).trim()) title = String(r.BoardTitle).trim();
+      if("RefreshSeconds" in r && num(r.RefreshSeconds)>0) refresh = num(r.RefreshSeconds);
+    }
+    return {title, refresh};
+  }
+
+  function compute(teamsRows, scoresRows, eventsRows){
+    const teams = teamsRows
+      .filter(r => !("active" in r) || normBool(r.active))
+      .map(r=>({
+        id:String(r.team_id||"").trim(),
+        name:String(r.team_name||"").trim() || String(r.team_id||"").trim(),
+        color:safeHex(r.team_color_hex),
+        image:String(r.image_url||"").trim()
+      }));
+
+    const categories = Object.keys(scoresRows[0]||{}).filter(k => !["student_id","student_name","team_id","class_group"].includes(k));
+    const membersByTeam = new Map(teams.map(t=>[t.id, []]));
+
+    for(const r of scoresRows){
+      const tid = String(r.team_id||"").trim();
+      if(!membersByTeam.has(tid)) continue;
+      const perCat = {};
+      categories.forEach(c => perCat[c] = num(r[c]));
+      const total = categories.reduce((a,c)=>a+perCat[c],0);
+      membersByTeam.get(tid).push({ id:r.student_id, name:r.student_name, perCat, total });
+    }
+
+    // Parse events rows from EVENTS sheet (QUERY output columns)
+    const events = (eventsRows||[]).map(r => ({
+      ts: r.col_0 ?? "",
+      teacher: r.col_1 ?? "",
+      target_type: r.col_2 ?? "",
+      target_id: r.col_3 ?? "",
+      category: r.col_4 ?? "",
+      points: num(r.col_5 ?? 0),
+      reason: r.col_6 ?? "",
+      student_name: r.col_8 ?? "",
+      team_id: r.col_9 ?? ""
+    }));
+
+    const byTeamEvents = new Map(teams.map(t=>[t.id, []]));
+    for(const e of events){
+      const tid = String(e.team_id||"").trim();
+      if(byTeamEvents.has(tid)) byTeamEvents.get(tid).push(e);
+    }
+
+    const teamModels = teams.map(t=>{
+      const members = (membersByTeam.get(t.id)||[]).sort((a,b)=>b.total-a.total);
+      const byCat = {};
+      categories.forEach(c => byCat[c] = members.reduce((acc,m)=>acc+num(m.perCat[c]),0));
+      const total = categories.reduce((a,c)=>a+byCat[c],0);
+      const feed = (byTeamEvents.get(t.id)||[]).slice(0,8);
+      return { ...t, categories, members, byCat, total, feed };
+    }).sort((a,b)=>b.total-a.total);
+
+    return {teams: teamModels};
+  }
+
+  function render(model, setup){
+    titleEl.textContent = setup.title;
+    subEl.textContent = `Actualización automática cada ${setup.refresh}s`;
+    grid.innerHTML = "";
+
+    const maxTotal = Math.max(1, ...model.teams.map(t=>t.total));
+
+    model.teams.forEach((t, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `#${idx+1}`;
+      if(idx===0) badge.classList.add("b1");
+      else if(idx===1) badge.classList.add("b2");
+      else if(idx===2) badge.classList.add("b3");
+      card.appendChild(badge);
+
+      const top = document.createElement("div"); top.className="top";
+      const id = document.createElement("div"); id.className="id";
+      const av = document.createElement("div"); av.className="avatar";
+      if(t.image){ const im=document.createElement("img"); im.src=t.image; im.alt=`Imagen de ${t.name}`; av.appendChild(im); }
+      const name = document.createElement("div"); name.className="name"; name.textContent=t.name; name.style.color=t.color;
+      id.appendChild(av); id.appendChild(name);
+
+      const total = document.createElement("div"); total.className="total"; total.textContent=t.total; total.style.color=t.color;
+      top.appendChild(id); top.appendChild(total);
+      card.appendChild(top);
+
+      const prog = document.createElement("div"); prog.className="progress";
+      const bar = document.createElement("div"); bar.className="bar"; bar.style.background=stripe(t.color);
+      requestAnimationFrame(()=> bar.style.width = `${(t.total/maxTotal)*100}%`);
+      prog.appendChild(bar); card.appendChild(prog);
+
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = "Ver desglose (categorías, alumnos y últimos puntos)";
+      details.appendChild(summary);
+
+      const catBox = document.createElement("div"); catBox.className="subgrid";
+      const maxCat = Math.max(1, ...Object.values(t.byCat));
+      Object.entries(t.byCat).forEach(([c,v])=>{
+        const row=document.createElement("div"); row.className="row";
+        const lab=document.createElement("span"); lab.textContent=c; lab.title=c;
+        const mini=document.createElement("div"); mini.className="mini";
+        const b=document.createElement("b"); b.style.background=t.color; b.style.width = `${(num(v)/maxCat)*100}%`;
+        mini.appendChild(b);
+        const val=document.createElement("strong"); val.textContent=v;
+        row.appendChild(lab); row.appendChild(mini); row.appendChild(val);
+        catBox.appendChild(row);
+      });
+
+      const stu=document.createElement("div"); stu.className="students";
+      t.members.forEach(m=>{
+        const s=document.createElement("div"); s.className="student";
+        const sn=document.createElement("div"); sn.className="sn"; sn.textContent=m.name;
+        const st=document.createElement("div"); st.className="st"; st.textContent=m.total;
+        s.appendChild(sn); s.appendChild(st);
+        stu.appendChild(s);
+      });
+
+      const feed=document.createElement("div"); feed.className="feed";
+      if((t.feed||[]).length){
+        (t.feed||[]).forEach(e=>{
+          const ev=document.createElement("div"); ev.className="event";
+          const txt=document.createElement("div");
+          const who=document.createElement("div"); who.className="who";
+          const nm = (e.target_type==="team") ? `Equipo ${t.name}` : (e.student_name || e.target_id);
+          who.textContent = `${nm} · ${e.category}`;
+          const why=document.createElement("div"); why.className="why"; why.textContent = e.reason || "(sin motivo)";
+          txt.appendChild(who); txt.appendChild(why);
+
+          const meta=document.createElement("div"); meta.className="meta";
+          const pts=document.createElement("div"); pts.className="pts"; pts.style.color=t.color;
+          pts.textContent = (e.points>=0? `+${e.points}` : `${e.points}`);
+          const when=document.createElement("div"); when.textContent = String(e.ts||"").slice(0,16);
+          meta.appendChild(pts); meta.appendChild(when);
+
+          ev.appendChild(txt); ev.appendChild(meta);
+          feed.appendChild(ev);
+        });
+      }else{
+        const none=document.createElement("div"); none.className="muted"; none.textContent="Aún no hay eventos recientes.";
+        feed.appendChild(none);
+      }
+
+      details.appendChild(catBox);
+      details.appendChild(stu);
+      details.appendChild(feed);
+      card.appendChild(details);
+
+      grid.appendChild(card);
+    });
+
+    updatedEl.textContent = "Última actualización: " + new Date().toLocaleString();
+  }
+
+  let timer=null;
+  async function loadAll(showStatus=false){
+    if(showStatus) statusEl.textContent="Cargando…";
+    try{
+      const [setupRows, teamsRows, scoresRows, eventsRows] = await Promise.all([
+        fetchTab(TAB_SETUP), fetchTab(TAB_TEAMS), fetchTab(TAB_SCORES), fetchTab(TAB_EVENTS)
+      ]);
+      const setup = readSetup(setupRows);
+      const model = compute(teamsRows, scoresRows, eventsRows);
+      render(model, setup);
+      statusEl.textContent="OK";
+      clearInterval(timer);
+      timer = setInterval(()=>loadAll(false), Math.max(8, setup.refresh)*1000);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent="Error";
+      alert("No se pudo cargar la clasificación. Revisa que el Sheet sea público (lector) y que existan SETUP/TEAMS/SCORES/EVENTS.");
+    }
+  }
+  loadAll(true);
+})();
+</script>
+</body>
+</html>
